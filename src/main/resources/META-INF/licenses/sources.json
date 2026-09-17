@@ -1,0 +1,62 @@
+[
+  {
+    "repository": "NucleoidMC/Gomoku",
+    "url": "https://github.com/NucleoidMC/Gomoku",
+    "commit": "0a65da2f3f2196a7be7e72b28a319c8631804b79",
+    "commit_date": "2025-06-30T06:24:01Z",
+    "checked_at": "2026-09-08T08:06:13.440346+00:00",
+    "branch": "master",
+    "license_spdx": "MIT",
+    "archived": false,
+    "stars": 0,
+    "language": "Java",
+    "archive_url": "https://codeload.github.com/NucleoidMC/Gomoku/zip/0a65da2f3f2196a7be7e72b28a319c8631804b79",
+    "archive_sha256": "f91e4e559a5e4bc7356da20e18a33a1c198688119c225a70b52830058339b5c7",
+    "validation": "source downloaded for inspection; not built or deployed"
+  },
+  {
+    "repository": "jwang541/Xiangqi",
+    "url": "https://github.com/jwang541/Xiangqi",
+    "commit": "de7133b383a4a36d9d08d5912ec5f0a479a930c1",
+    "commit_date": "2022-12-27T16:18:23Z",
+    "checked_at": "2026-09-08T08:07:23.323273+00:00",
+    "branch": "master",
+    "license_spdx": "MIT",
+    "archived": false,
+    "stars": 1,
+    "language": "Java",
+    "archive_url": "https://codeload.github.com/jwang541/Xiangqi/zip/de7133b383a4a36d9d08d5912ec5f0a479a930c1",
+    "archive_sha256": "1b368ca13918e61eed188bf683d5a7fa66126c463606ca8bb53fbb0582b7310b",
+    "validation": "source downloaded for inspection; not built or deployed"
+  },
+  {
+    "repository": "kan01234/aeroplanes-chess",
+    "url": "https://github.com/kan01234/aeroplanes-chess",
+    "commit": "148397f4fc846d98779c367849e2875726d47b3b",
+    "commit_date": "2019-02-18T04:22:39Z",
+    "checked_at": "2026-09-08T08:06:14.679132+00:00",
+    "branch": "master",
+    "license_spdx": "MIT",
+    "archived": false,
+    "stars": 1,
+    "language": "Java",
+    "archive_url": "https://codeload.github.com/kan01234/aeroplanes-chess/zip/148397f4fc846d98779c367849e2875726d47b3b",
+    "archive_sha256": "be1f984a7d25c49dc3edaf92aff44f2193486be1b8d489ab5f55c223e7dc9f9a",
+    "validation": "source downloaded for inspection; not built or deployed"
+  },
+  {
+    "repository": "hongsenliu/chinese-checkers",
+    "url": "https://github.com/hongsenliu/chinese-checkers",
+    "commit": "abf2fc6aeeb94b14a37d13abd223ed935b450a3a",
+    "commit_date": "2012-12-05T16:23:05Z",
+    "checked_at": "2026-09-08T08:08:18.202569+00:00",
+    "branch": "master",
+    "license_spdx": "GPL-3.0",
+    "archived": false,
+    "stars": 5,
+    "language": "Java",
+    "archive_url": "https://codeload.github.com/hongsenliu/chinese-checkers/zip/abf2fc6aeeb94b14a37d13abd223ed935b450a3a",
+    "archive_sha256": "374494b5bf1370dd5aac8de6b8c534ebcd2ab642e63e2b62c23e53c9c1b7dc8b",
+    "validation": "source downloaded for inspection; not built or deployed"
+  }
+]

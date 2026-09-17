@@ -1,0 +1,17 @@
+ServerGames board-rules 1.0.0
+Combined module: GPL-3.0-or-later. Full corresponding source must accompany redistribution.
+
+NucleoidMC/Gomoku: Copyright (c) 2022 Jerozgen, MIT.
+jwang541/Xiangqi: Copyright (c) 2022 James Wang, MIT.
+kan01234/aeroplanes-chess: Copyright (c) 2019 kan01234, MIT.
+hongsenliu/chinese-checkers: Copyright (C) 2012- Stephane Coutant, GPL-3.0-or-later.
+bhlangonijr/chesslib: Apache-2.0. Original source copyright notices are retained.
+All exact upstream commits and full licenses are in META-INF/licenses/.
+
+Adaptation changes: separate server-safe immutable API; no Android, Fabric or Spring;
+fix Gomoku full-board win precedence and Xiangqi elephant river restriction;
+short-jump Chinese checkers; explicit Aeroplane Chess variant; conservative chess
+dead-material checks; authoritative turn checks and mutation-free rejected actions.
+See README.md in corresponding source for complete rules and limits.
+
+Runtime dependency: Apache Commons Lang 3.12.0, Apache-2.0.

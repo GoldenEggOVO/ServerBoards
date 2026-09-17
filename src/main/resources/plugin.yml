@@ -1,0 +1,13 @@
+name: ServerBoards
+version: 1.0.0
+main: dev.server.boards.ServerBoards
+api-version: '26.2'
+depend: [ServerGames]
+softdepend: [AuthMe]
+commands:
+  boards:
+    description: 棋类房间和实体棋盘
+    permission: serverboards.use
+permissions:
+  serverboards.use:
+    default: true

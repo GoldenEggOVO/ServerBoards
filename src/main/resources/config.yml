@@ -1,0 +1,4 @@
+max-rooms: 12
+reconnect-seconds: 120
+idle-room-minutes: 30
+turn-seconds: 60

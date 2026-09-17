@@ -1,0 +1,18 @@
+package dev.server.boards;
+
+import com.google.gson.JsonPrimitive;
+import dev.server.boards.rules.*;
+import org.junit.jupiter.api.Test;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+class RoundActionsTest {
+    Room room(String kind,boolean human){Room r=new Room(UUID.randomUUID(),kind,2,41,3);r.join(UUID.randomUUID(),"first");if(human)r.join(UUID.randomUUID(),"second");else r.fillBots();r.board=GameFactory.create(kind,2,r.seed);r.phase=Room.Phase.PLAYING;return r;}
+    void move(Room r,String action){int seat=r.board.currentPlayer();r.board.apply(seat,action);r.event(seat,new JsonPrimitive(action));r.revision++;}
+    @Test void undoNeedsOpponentAndRemovesOwnMovePlusReply(){var r=room("gomoku",true);move(r,"place:0,0");move(r,"place:1,0");UUID first=r.seats.getFirst().id(),other=r.seats.getLast().id();long rev=r.revision;RoundActions.request(r,first,0);assertThrows(IllegalArgumentException.class,()->r.requireAction(first,r.revision));assertThrows(IllegalArgumentException.class,()->RoundActions.apply(r));assertThrows(IllegalArgumentException.class,()->RoundActions.approve(r,UUID.randomUUID(),1));assertTrue(RoundActions.approve(r,other,2));RoundActions.apply(r);assertTrue(r.history.isEmpty());assertTrue(r.board.cells().stream().allMatch(c->c.owner()<0));assertTrue(r.revision>rev);assertEquals(0,r.board.currentPlayer());}
+    @Test void rejectionAndExpiredApprovalDoNotChangeBoard(){var r=room("gomoku",true);move(r,"place:2,2");var before=r.board.cells();RoundActions.request(r,r.seats.getFirst().id(),10);assertThrows(IllegalArgumentException.class,()->RoundActions.approve(r,r.seats.getLast().id(),30010));RoundActions.reject(r,r.seats.getLast().id());assertEquals(before,r.board.cells());assertEquals(1,r.history.size());assertNull(r.undo);}
+    @Test void botUndoPreservesDiceStreamAndWholeTurn(){var r=room("yacht",false);move(r,"roll");int[] dice=((YachtGame)r.board).dice();move(r,"hold:die0");move(r,"roll");move(r,"score:ones");move(r,"roll");move(r,"score:ones");RoundActions.request(r,r.seats.getFirst().id(),0);assertTrue(r.undo.pending.isEmpty());RoundActions.apply(r);assertTrue(r.history.isEmpty());move(r,"roll");assertArrayEquals(dice,((YachtGame)r.board).dice());}
+    @Test void rematchNeedsAllHumansPreservesTableAndGetsNewSeed(){var r=room("reversi",true);r.phase=Room.Phase.FINISHED;r.completed=true;r.result="winner:0";r.history.add(new JsonPrimitive("old"));long revision=r.revision;assertFalse(RoundActions.rematchReady(r,r.seats.getFirst().id()));assertThrows(IllegalArgumentException.class,()->RoundActions.fresh(r,90));assertTrue(RoundActions.rematchReady(r,r.seats.getLast().id()));RoundActions.fresh(r,90);assertEquals(3,r.table);assertEquals(2,r.seats.size());assertEquals(90,r.seed);assertTrue(r.history.isEmpty());assertNull(r.board);assertFalse(r.completed);assertEquals(Room.Phase.LOBBY,r.phase);assertTrue(r.revision>revision);}
+    @Test void cannotUndoOtherPlayersFirstMoveOrCards(){var r=room("gomoku",true);move(r,"place:0,0");assertThrows(IllegalArgumentException.class,()->RoundActions.request(r,r.seats.getLast().id(),0));var card=new Room(UUID.randomUUID(),"uno",2,1,0);card.join(UUID.randomUUID(),"card");card.phase=Room.Phase.PLAYING;assertThrows(IllegalArgumentException.class,()->RoundActions.request(card,card.seats.getFirst().id(),0));}
+    @Test void diceBotsFinishEveryRoundWithoutHoldLoops(){var g=new YachtGame(4,6);Random random=new Random(12);int steps=0;while(!g.finished()&&steps++<1500){int seat=g.currentPlayer();String action=BoardBots.choose(g,seat,random);assertTrue(g.legalActions(seat).contains(action));g.apply(seat,action);}assertTrue(g.finished(),"steps="+steps);}
+}
