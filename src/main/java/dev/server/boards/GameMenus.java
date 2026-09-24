@@ -12,14 +12,26 @@ final class GameMenus implements AutoCloseable {
     record Button(String id,String label,Runnable action){Button(String label,Runnable action){this("entry",label,action);}}
     record Session(UUID token,UUID world,long expires,List<Button> buttons){}
     private final ServerBoards plugin;private final Map<UUID,Session> sessions=new HashMap<>();
-    GameMenus(ServerBoards p){plugin=p;}
+    private final BoardWindow window;
+    GameMenus(ServerBoards p){this(p,null);}
+    GameMenus(ServerBoards p,BoardWindow window){plugin=p;this.window=window;}
     void show(Player p,String title,String description,List<Button> buttons,Runnable back){
         show(p,title,description,buttons,back,"dialog");
     }
     void show(Player p,String title,String description,List<Button> buttons,Runnable back,String page){
         if(!plugin.allowed(p))return;
-        List<Button> entries=new ArrayList<>(buttons);if(back!=null)entries.add(new Button("返回",back));
-        UUID token=UUID.randomUUID();sessions.put(p.getUniqueId(),new Session(token,p.getWorld().getUID(),System.currentTimeMillis()+120000,List.copyOf(entries)));
+        List<Button> entries=new ArrayList<>(buttons);
+        if(back!=null)entries.add(new Button("back","返回上一页",back));
+        else if(plugin.mainMenuAvailable())entries.add(new Button("main","返回主菜单",()->{forget(p);Bukkit.dispatchCommand(p,"servermenu:servermenu main");}));
+        entries.add(new Button("close","关闭菜单",()->forget(p)));
+        UUID token=UUID.randomUUID();
+        if(window!=null){
+            var rendered=window.render(page,title,description,entries,token);
+            entries=rendered.buttons();
+            sessions.put(p.getUniqueId(),new Session(token,p.getWorld().getUID(),System.currentTimeMillis()+120000,List.copyOf(entries)));
+            if(window.open(p,rendered.config(),page))return;
+        }
+        sessions.put(p.getUniqueId(),new Session(token,p.getWorld().getUID(),System.currentTimeMillis()+120000,List.copyOf(entries)));
         p.sendMessage("§6"+title+"\n§f"+description);
         for(int i=0;i<entries.size();i++)p.sendMessage(net.kyori.adventure.text.Component.text("["+entries.get(i).label()+"] ").clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/boards click boards:"+token+" "+i)));
     }
@@ -34,7 +46,7 @@ final class GameMenus implements AutoCloseable {
     void main(Player p){
         List<Button> b=new ArrayList<>();Room current=plugin.room(p);
         if(current!=null)b.add(new Button("resume","继续当前对局",()->plugin.resume(p,current)));
-        for(String kind:ServerBoards.NAMES.keySet())b.add(new Button(kind,ServerBoards.gameName(kind),()->games(p,kind)));
+        for(String kind:ServerBoards.NAMES.keySet())if(!Set.of("go9","go13").contains(kind))b.add(new Button(kind,ServerBoards.gameName(kind),()->games(p,kind)));
         show(p,"棋牌游戏","",b,null,"catalog");
     }
     void games(Player p,String kind){

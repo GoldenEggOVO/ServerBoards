@@ -58,11 +58,11 @@ class TableLobbyTest {
         var field=ServerBoards.class.getDeclaredField("returns");field.setAccessible(true);field.set(plugin,new HashMap<UUID,Location>());
         var r=new Room(UUID.randomUUID(),"checkers",3,1,0);Player a=mock(Player.class);UUID first=UUID.randomUUID(),second=UUID.randomUUID();
         when(a.getUniqueId()).thenReturn(first);r.join(first,"A");r.join(second,"B");r.ready.addAll(List.of(first,second));
-        plugin.coordinator=mock(dev.server.games.api.GameCoordinator.class);when(plugin.room(a)).thenReturn(r);doCallRealMethod().when(plugin).leave(a);plugin.leave(a);
+        plugin.coordinator=mock(BoardOccupancy.class);when(plugin.room(a)).thenReturn(r);doCallRealMethod().when(plugin).leave(a);plugin.leave(a);
         assertEquals(Set.of(second),r.ready);assertEquals(1,r.seats.size());verify(plugin,never()).remove(r);
     }
     ServerBoards plugin(){
-        var p=mock(ServerBoards.class);p.coordinator=mock(dev.server.games.api.GameCoordinator.class);
+        var p=mock(ServerBoards.class);p.coordinator=mock(BoardOccupancy.class);
         when(p.getName()).thenReturn("ServerBoards");when(p.isEnabled()).thenReturn(true);when(p.getServer()).thenReturn(MockBukkit.getMock());
         when(p.getPluginLoader()).thenReturn(MockBukkit.createMockPlugin().getPluginLoader());when(p.allowed(any())).thenReturn(true);return p;
     }

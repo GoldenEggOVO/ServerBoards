@@ -1,8 +1,7 @@
 name: ServerBoards
-version: 1.0.0
+version: 1.2.1
 main: dev.server.boards.ServerBoards
 api-version: '26.2'
-depend: [ServerGames]
 softdepend: [AuthMe]
 commands:
   boards:

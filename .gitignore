@@ -2,3 +2,5 @@ target/
 *.log
 .idea/
 .vscode/
+__pycache__/
+deliverables/

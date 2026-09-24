@@ -1,0 +1,30 @@
+# 简洁菜单；按钮 ID 绑定服务器动作，外观可在 ServerBoards/menus 中编辑。
+Title: '&f@title@'
+Bottom:
+  type: multi
+  columns: 1
+  buttons:
+    entry:
+      text: '&f@label@'
+      width: 350
+      actions: [close]
+    resume:
+      text: '&e@label@'
+      width: 350
+      actions: [close]
+    connectfour:
+      text: '&f@label@'
+      width: 350
+      actions: ['close']
+    back:
+      text: '&e返回上一页'
+      width: 350
+      actions: [close]
+    main:
+      text: '&e返回主菜单'
+      width: 350
+      actions: [close]
+  exit:
+    text: '&8[ &c关闭菜单 &8]'
+    width: 230
+    actions: [close]

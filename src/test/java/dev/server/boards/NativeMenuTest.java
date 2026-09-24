@@ -7,6 +7,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 class NativeMenuTest {
+    @Test void standaloneCatalogDoesNotOfferMissingServerMenu() throws Exception {
+        var plugin=mock(ServerBoards.class);when(plugin.allowed(any())).thenReturn(true);
+        var player=mock(Player.class);when(player.getUniqueId()).thenReturn(UUID.randomUUID());
+        var world=mock(World.class);when(world.getUID()).thenReturn(UUID.randomUUID());when(player.getWorld()).thenReturn(world);
+        var menus=new GameMenus(plugin);menus.show(player,"Games","",List.of(),null);
+        var field=GameMenus.class.getDeclaredField("sessions");field.setAccessible(true);
+        @SuppressWarnings("unchecked") var sessions=(Map<UUID,GameMenus.Session>)field.get(menus);
+        assertFalse(sessions.get(player.getUniqueId()).buttons().stream().anyMatch(b->b.id().equals("main")));
+    }
     @SuppressWarnings("unchecked") private String action(GameMenus menus,Player p)throws Exception{var field=GameMenus.class.getDeclaredField("sessions");field.setAccessible(true);var sessions=(Map<UUID,GameMenus.Session>)field.get(menus);return "boards:"+sessions.get(p.getUniqueId()).token()+" 0";}
     @Test void callbackIsSingleUseAndBoundToPlayerAndWorld()throws Exception{
         var plugin=mock(ServerBoards.class);when(plugin.allowed(any())).thenReturn(true);var p=mock(Player.class);when(p.getUniqueId()).thenReturn(UUID.randomUUID());var world=mock(World.class);when(world.getUID()).thenReturn(UUID.randomUUID());when(p.getWorld()).thenReturn(world);

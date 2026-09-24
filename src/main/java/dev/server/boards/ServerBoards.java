@@ -22,16 +22,15 @@ public final class ServerBoards extends JavaPlugin implements Listener, CommandE
     final Map<UUID,Location> returns=new HashMap<>();
     final SecureRandom random=new SecureRandom();
     GameMenus menus; GameWorld arena; TableComfort comfort; TableLobby tableLobby;
-    dev.server.games.api.GameCoordinator coordinator;
+    BoardOccupancy coordinator;
     boolean stopping=false; private boolean loaded=false; private boolean authWarned=false; private int pulse=0;
     private final Gson gson=new GsonBuilder().setPrettyPrinting().create();
     File jarFile(){return getFile();}
     @Override public void onEnable(){
         saveDefaultConfig();
         try {
-            menus=new GameMenus(this); arena=new GameWorld(this);
-            coordinator=Objects.requireNonNull(Bukkit.getServicesManager().load(dev.server.games.api.GameCoordinator.class),"ServerGames coordinator unavailable");
-            for(String kind:NAMES.keySet())coordinator.register(this,new BoardProvider(this,kind));
+            menus=new GameMenus(this,new BoardWindow(this)); arena=new GameWorld(this);
+            coordinator=new BoardOccupancy();
             comfort=new TableComfort(this); tableLobby=new TableLobby(this);tableLobby.start();
             Objects.requireNonNull(getCommand("boards")).setExecutor(this);getCommand("boards").setTabCompleter(this);
             Bukkit.getPluginManager().registerEvents(this,this);
@@ -40,9 +39,10 @@ public final class ServerBoards extends JavaPlugin implements Listener, CommandE
             getLogger().info("ServerBoards 已启用。");
         } catch(Exception|LinkageError ex){getLogger().log(java.util.logging.Level.SEVERE,"棋牌室初始化失败",ex);Bukkit.getPluginManager().disablePlugin(this);}
     }
-    @Override public void onDisable(){stopping=true;save();if(tableLobby!=null)tableLobby.close();if(coordinator!=null)coordinator.unregister(this);if(comfort!=null)comfort.close();if(menus!=null)menus.close();if(arena!=null)arena.close();}
+    @Override public void onDisable(){stopping=true;save();if(tableLobby!=null)tableLobby.close();if(coordinator!=null)coordinator.close();if(comfort!=null)comfort.close();if(menus!=null)menus.close();if(arena!=null)arena.close();}
     public void suspendView(Player player){if(menus!=null)menus.forget(player);}
     public boolean hasActiveGame(Player player){return room(player)!=null;}
+    boolean mainMenuAvailable(){return Bukkit.getPluginCommand("servermenu:servermenu")!=null;}
 
     boolean allowed(Player p){
         if(!p.isOnline()||!p.hasPermission("serverboards.use"))return false;
@@ -225,7 +225,7 @@ public final class ServerBoards extends JavaPlugin implements Listener, CommandE
             for(var entry:root.getAsJsonObject("returns").entrySet()){JsonObject j=entry.getValue().getAsJsonObject();World w=Bukkit.getWorld(j.get("world").getAsString());if(w!=null)returns.put(UUID.fromString(entry.getKey()),new Location(w,j.get("x").getAsDouble(),j.get("y").getAsDouble(),j.get("z").getAsDouble(),j.get("yaw").getAsFloat(),j.get("pitch").getAsFloat()));}
             for(JsonElement e:root.getAsJsonArray("rooms")){JsonObject j=e.getAsJsonObject();Room r=new Room(UUID.fromString(j.get("id").getAsString()),j.get("kind").getAsString(),j.get("capacity").getAsInt(),j.get("seed").getAsLong(),j.get("table").getAsInt());
                 if(j.has("anchorWorld")){r.anchorWorld=UUID.fromString(j.get("anchorWorld").getAsString());r.anchorX=j.get("anchorX").getAsDouble();r.anchorY=j.get("anchorY").getAsDouble();r.anchorZ=j.get("anchorZ").getAsDouble();}
-                for(JsonElement s:j.getAsJsonArray("seats")){Room.Seat seat=gson.fromJson(s,Room.Seat.class);r.seats.add(seat);if(!seat.bot()&&!coordinator.restoreReservation(this,seat.id(),r.kind))throw new IllegalStateException("恢复座位与其他游戏冲突");if(!seat.bot())r.offline.put(seat.id(),System.currentTimeMillis());}
+                for(JsonElement s:j.getAsJsonArray("seats")){Room.Seat seat=gson.fromJson(s,Room.Seat.class);r.seats.add(seat);if(!seat.bot()&&!coordinator.restoreReservation(seat.id(),r.kind))throw new IllegalStateException("恢复座位与其他游戏冲突");if(!seat.bot())r.offline.put(seat.id(),System.currentTimeMillis());}
                 r.history.addAll(j.getAsJsonArray("history"));r.revision=j.get("revision").getAsLong();r.completed=j.has("completed")&&j.get("completed").getAsBoolean();r.result=j.has("result")?j.get("result").getAsString():"";rooms.put(r.id,r);arena.platform(r.table);
                 if(!j.get("phase").getAsString().equals("LOBBY")){r.restoring=true;start(r);}else if(r.board==null){r.board=GameFactory.create(r.kind,r.capacity,r.seed);arena.render(r);}
             }

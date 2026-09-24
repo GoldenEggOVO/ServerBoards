@@ -1,7 +1,6 @@
 package dev.server.boards;
 
 import com.google.gson.Gson;
-import dev.server.games.api.GameCoordinator;
 import java.nio.file.*;
 import java.util.*;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ class OfflineRestoreTest {
 
     @Test void persistedOfflineSeatsUseOwnerAuthenticatedRestoreInsteadOfAdmission() throws Exception {
         ServerBoards plugin = mock(ServerBoards.class);
-        plugin.coordinator = mock(GameCoordinator.class);
+        plugin.coordinator = mock(BoardOccupancy.class);
         plugin.arena = mock(GameWorld.class);
         set(plugin, "rooms", new LinkedHashMap<UUID, Room>());
         set(plugin, "returns", new HashMap<>());
@@ -25,9 +24,9 @@ class OfflineRestoreTest {
         UUID player = UUID.randomUUID();
         String source = "{\"returns\":{},\"rooms\":[{\"id\":\"" + UUID.randomUUID() + "\",\"kind\":\"chess\",\"capacity\":2,\"seed\":1,\"table\":0,\"phase\":\"LOBBY\",\"revision\":1,\"history\":[],\"seats\":[{\"id\":\"" + player + "\",\"name\":\"offline\",\"bot\":false}]}]}";
         Files.writeString(directory.resolve("rooms.json"), source);
-        when(plugin.coordinator.restoreReservation(plugin, player, "chess")).thenReturn(true);
+        when(plugin.coordinator.restoreReservation(player, "chess")).thenReturn(true);
         assertDoesNotThrow(plugin::restore);
-        verify(plugin.coordinator).restoreReservation(plugin, player, "chess");
+        verify(plugin.coordinator).restoreReservation(player, "chess");
         verify(plugin.coordinator, never()).reserve(any(), any());
         assertEquals(1, plugin.rooms.size());
         assertTrue(plugin.rooms.values().iterator().next().offline.containsKey(player));

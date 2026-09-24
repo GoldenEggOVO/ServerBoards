@@ -1,12 +1,11 @@
 package dev.server.boards;
-import dev.server.games.api.GameCoordinator;
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.Test;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 class BoardOccupancyTest {
-    private ServerBoards plugin(){ServerBoards plugin=mock(ServerBoards.class);plugin.coordinator=mock(GameCoordinator.class);when(plugin.allowed(any())).thenReturn(true);doCallRealMethod().when(plugin).create(any(),anyString(),anyInt());doCallRealMethod().when(plugin).join(any(),any());return plugin;}
+    private ServerBoards plugin(){ServerBoards plugin=mock(ServerBoards.class);plugin.coordinator=mock(BoardOccupancy.class);when(plugin.allowed(any())).thenReturn(true);doCallRealMethod().when(plugin).create(any(),anyString(),anyInt());doCallRealMethod().when(plugin).join(any(),any());return plugin;}
     private Player player(){Player p=mock(Player.class);when(p.getUniqueId()).thenReturn(UUID.randomUUID());return p;}
     @Test void reservationRefusalPreventsRoomCreation(){var plugin=plugin();var p=player();assertThrows(IllegalArgumentException.class,()->plugin.create(p,"chess",2));verify(plugin,never()).createReserved(any(),anyString(),anyInt());verify(plugin.coordinator,never()).release(any(),any());}
     @Test void creationFailureReleasesReservation(){var plugin=plugin();var p=player();when(plugin.coordinator.reserve(p.getUniqueId(),"chess")).thenReturn(true);doThrow(new IllegalArgumentException("blocked terrain")).when(plugin).createReserved(p,"chess",2);assertThrows(IllegalArgumentException.class,()->plugin.create(p,"chess",2));verify(plugin.coordinator).release(p.getUniqueId(),"chess");}
